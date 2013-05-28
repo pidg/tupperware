@@ -12,10 +12,10 @@
 
 // +- Settings ---------------------------------------------------------------+
 
-  $dbhost="localhost";	// MySQL server
-  $dbuser="taras";		// MySQL username
-  $dbpass="password";	// MySQL password
-  $dbname="taras";		// MySQL database
+  $dbhost="";			// MySQL server
+  $dbuser="";			// MySQL username
+  $dbpass="";			// MySQL password
+  $dbname="";			// MySQL database
   $prefix = "tu";		// ThinkUp table prefix (e.g. tu_users would be "tu")
   $user = "tarasyoung";	// Your Twitter username
 
@@ -33,7 +33,7 @@ function create_table($arr)
 	// Output all rows
 	foreach ( $arr as $a )
 	{
-		$t="";
+		$t=""; 
 		foreach ( $keys as $k ) $t = $t . "  <td>" . $a[$k] . "</td>\n";
 		echo " <tr>$t </tr>\n";
 	}
@@ -64,33 +64,16 @@ function query($query)
 
 $conn='';
 
-// Find 'me' based on $user:
+// Find my user details:
 $q = query("SELECT * FROM " . $prefix . "_users WHERE user_name LIKE '$user';") or exit("User not found.");
 $me = $q[0];
 
-// Find everyone who follows that user:
+// Get followers:
 $everyone = query("SELECT * FROM " . $prefix . "_follows WHERE active = '1' AND user_id = '" . $me["user_id"] . "';") or exit("No active followers found.");
-
-// Cycle through the results and get each follower's details:
 foreach ( $everyone as $person )
 {
 	$q = query("SELECT * FROM " . $prefix . "_users WHERE user_id LIKE '" . $person["follower_id"] . "';");
-	$follower = $q[0];
-
-	if ( $follower["user_name"] )
-	{
-		$followers[]["name"] = $follower["full_name"];
-		$c = count($followers)-1;
-		$followers[$c]["twitter"] = $follower["user_name"];
-		$followers[$c]["pic"] = $follower["avatar"];
-		$followers[$c]["location"] = $follower["location"];
-		$followers[$c]["desc"] = $follower["description"];
-		$followers[$c]["url"] = $follower["url"];
-		$followers[$c]["followers"] = $follower["follower_count"];
-		$followers[$c]["posts"] = $follower["post_count"];
-		$followers[$c]["last"] = $follower["last_updated"];		
-	}
-
+	if ( $q[0]["user_name"] ) $followers[] = $q[0];
 }
 
 // Output a table of followers and their details:
